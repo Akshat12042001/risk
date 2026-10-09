@@ -23,6 +23,10 @@ target 'DummyProject' do
     :app_path => "#{Pod::Config.instance.installation_root}/.."
   )
 
+  # Enable Google Maps on iOS for react-native-maps
+  rn_maps_path = '../node_modules/react-native-maps'
+  pod 'react-native-maps/Google', :path => rn_maps_path
+
   post_install do |installer|
 
     react_native_post_install(

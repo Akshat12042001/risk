@@ -1,0 +1,104 @@
+{
+    "WELCOME_SCREEN": {
+        "SKIP_LOGIN": "Skip login",
+        "BRAND_TAGLINE": "Get professional house help in minutes!",
+        "ACCENT_BAR": "By continuing, you agree to our Terms of Service & Privacy Policy",
+        "FOOTER_LINK": "Terms of Service",
+        "FOOTER_LINK_2": "Privacy Policy",
+        "LOG_IN_OR_SIGN_UP": "Log in or Sign up",
+        "PHONE_NUMBER": "Phone number",
+        "GET_UPDATES_ON_WHATSAPP": "Get updates on WhatsApp",
+        "CONTINUE": "Continue"
+    },
+    "OTP_SCREEN": {
+        "TITLE": "OTP verification",
+        "ENTER_OTP": "Enter the OTP sent to {{phone}}",
+        "RESEND_SMS_IN": "Resend SMS in {{seconds}}s",
+        "RESEND_SMS": "Resend SMS",
+        "DONE": "Done"
+    },
+    "REFERRAL_CODE_SCREEN": {
+        "TITLE": "Enter referral code",
+        "SUBTITLE": "It's optional, you can skip this",
+        "PLACEHOLDER": "Enter referral code",
+        "CONTINUE": "Continue",
+        "SKIP": "Skip for now"
+    },
+    "USER_DETAIL_SCREEN": {
+        "TITLE_PREFIX": "Help us",
+        "TITLE_HIGHLIGHT": "know you",
+        "TITLE_SUFFIX": "better",
+        "FIRST_NAME": "First name",
+        "LAST_NAME": "Last name (optional)",
+        "EMAIL": "Email (optional)",
+        "CONTINUE": "Continue"
+    },
+    "TABS": {
+        "HOME": "Home",
+        "BOOKINGS": "Bookings"
+    },
+    "HOME_SCREEN": {
+        "COMING_PREFIX": "WE ARE COMING",
+        "COMING_SOON": "SOON",
+        "COMING_DESCRIPTION": "We're currently live in select areas and expanding quickly. Get notified when we are near you!",
+        "NOTIFY_ME": "Notify me!",
+        "CHANGE_LOCATION": "Change location",
+        "SERVICES_TITLE": "Services we offer"
+    },
+    "BOOKINGS_SCREEN": {
+        "TITLE": "My Bookings",
+        "HELP": "Help",
+        "UPCOMING": "Upcoming",
+        "PREVIOUS": "Previous",
+        "EMPTY": "No bookings found"
+    },
+    "PROFILE_SCREEN": {
+        "TITLE": "Profile",
+        "EDIT_PROFILE": "Edit profile",
+        "MY_BOOKINGS": "My Bookings",
+        "HELP_SUPPORT": "Help & Support",
+        "WHATSAPP_UPDATES": "Get updates on WhatsApp",
+        "SAVED_ADDRESSES": "Saved addresses",
+        "ABOUT_US": "About us",
+        "TERMS": "Terms of services",
+        "PRIVACY": "Privacy policy",
+        "DELETE_ACCOUNT": "Request account deletion",
+        "LOG_OUT": "Log out",
+        "APP_VERSION": "APP VERSION: {{version}}"
+    },
+    "PROFILE_DETAILS_SCREEN": {
+        "TITLE": "Profile details",
+        "FIRST_NAME": "First Name",
+        "LAST_NAME": "Last Name",
+        "MOBILE": "Mobile",
+        "EMAIL": "Email",
+        "UPDATE": "Update profile",
+        "PHOTO_TITLE": "Update profile photo",
+        "CAMERA": "Take photo",
+        "GALLERY": "Choose from gallery",
+        "CANCEL": "Cancel",
+        "PHOTO_ERROR": "Unable to update profile photo"
+    },
+    "MY_ADDRESSES_SCREEN": {
+        "TITLE": "My Addresses",
+        "ADD": "Add addresses",
+        "SAVED": "SAVED ADDRESSES",
+        "CURRENTLY_SELECTED": "Currently selected",
+        "EDIT": "EDIT"
+    },
+    "CONFIRM_LOCATION_SCREEN": {
+        "TITLE": "Confirm your location",
+        "SEARCH_PLACEHOLDER": "Search locality, sector, area",
+        "SET_AS_LOCATION": "Set this as your location",
+        "GO_TO_CURRENT": "Go to current location",
+        "CONFIRM": "Confirm location",
+        "SELECTED_LOCATION": "Selected location",
+        "FETCHING_ADDRESS": "Fetching address...",
+        "LOCATION_ERROR": "Unable to fetch your location"
+    },
+    "PLACEHOLDERS": {
+        "OK": "OK",
+        "NO": "No",
+        "YES": "Yes"
+    }
+}

@@ -1,0 +1,138 @@
+import {StyleSheet} from 'react-native';
+import {COLORS, SCREEN_PADDING} from '../../../constants';
+
+export default StyleSheet.create({
+  root: {
+    flex: 1,
+    backgroundColor: COLORS.WHITE,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: SCREEN_PADDING,
+    paddingBottom: 14,
+  },
+  title: {
+    fontWeight: '800',
+  },
+  helpButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: COLORS.BORDER,
+    backgroundColor: COLORS.WHITE,
+  },
+  helpLabel: {
+    fontWeight: '500',
+    marginLeft: 6,
+  },
+  divider: {
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: COLORS.BORDER,
+  },
+  segmentWrap: {
+    paddingHorizontal: SCREEN_PADDING,
+    paddingTop: 16,
+    paddingBottom: 8,
+  },
+  segment: {
+    flexDirection: 'row',
+    borderWidth: 1,
+    borderColor: COLORS.BORDER,
+    borderRadius: 28,
+    padding: 4,
+    backgroundColor: COLORS.WHITE,
+  },
+  segmentItem: {
+    flex: 1,
+    height: 44,
+    borderRadius: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  segmentItemActive: {
+    backgroundColor: '#3B4D6B',
+  },
+  segmentLabel: {
+    fontWeight: '700',
+  },
+  content: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingBottom: 80,
+  },
+  emptyIllustration: {
+    width: 120,
+    height: 120,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+  },
+  calendarBody: {
+    width: 88,
+    height: 96,
+    borderRadius: 14,
+    backgroundColor: COLORS.PRIMARY,
+    paddingTop: 10,
+    alignItems: 'center',
+    overflow: 'hidden',
+  },
+  calendarBinders: {
+    position: 'absolute',
+    top: 6,
+    left: 0,
+    right: 0,
+    flexDirection: 'row',
+    justifyContent: 'space-evenly',
+    zIndex: 2,
+  },
+  binder: {
+    width: 8,
+    height: 16,
+    borderRadius: 4,
+    backgroundColor: COLORS.BLACK,
+  },
+  calendarPage: {
+    marginTop: 10,
+    width: '100%',
+    flex: 1,
+    backgroundColor: COLORS.WHITE,
+    borderTopLeftRadius: 4,
+    borderTopRightRadius: 4,
+    paddingTop: 12,
+    paddingHorizontal: 10,
+  },
+  calendarGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+  },
+  calendarDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 2,
+    backgroundColor: '#D6D3D1',
+    marginBottom: 8,
+  },
+  checkBadge: {
+    position: 'absolute',
+    right: 10,
+    bottom: 18,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: '#D6B588',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: COLORS.WHITE,
+  },
+  emptyText: {
+    fontWeight: '500',
+  },
+});

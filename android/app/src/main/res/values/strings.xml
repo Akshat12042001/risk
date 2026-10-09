@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">DummyProject</string>
+    <string name="google_maps_key">AIzaSyBteSXgeCh5tcLGtCGTAH762pkqvdnaDzk</string>
 </resources>
