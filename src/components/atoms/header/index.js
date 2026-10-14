@@ -5,6 +5,7 @@ import {COLORS} from '../../../constants';
 import Icon from '../icon';
 import StyledText from '../styledText';
 import styles from './styles';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const Header = ({
   title,
@@ -18,7 +19,7 @@ const Header = ({
   style,
 }) => {
   const navigation = useNavigation();
-
+  const insets = useSafeAreaInsets();
   const handleBack = useCallback(() => {
     if (onBack) {
       onBack();
@@ -32,7 +33,7 @@ const Header = ({
   const isCentered = titleAlign === 'center';
 
   return (
-    <View style={[styles.container, {backgroundColor}, style]}>
+    <View style={[styles.container, {backgroundColor, paddingTop: insets.top}, style]}>
       {showBack ? (
         <Pressable style={styles.backButton} onPress={handleBack} hitSlop={8}>
           <Icon name="arrow-back" size={24} color={iconColor} />

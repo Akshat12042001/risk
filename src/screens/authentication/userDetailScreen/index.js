@@ -11,9 +11,11 @@ import {
 } from '../../../components/atoms';
 import {COLORS} from '../../../constants';
 import styles from './styles';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const UserDetailScreen = () => {
   const {t} = useTranslation();
+  const insets = useSafeAreaInsets();
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
@@ -35,10 +37,8 @@ const UserDetailScreen = () => {
   };
 
   return (
-    <ScreenContainer>
-      <StatusBar barStyle="dark-content" backgroundColor={COLORS.WHITE} />
-
-      <View style={styles.root}>
+    <ScreenContainer noPaddingBottom noPaddingTop>
+      <View style={[styles.root, {paddingTop: insets.top}]}>
         <KeyboardAwareScrollView
           enableOnAndroid
           keyboardShouldPersistTaps="handled"

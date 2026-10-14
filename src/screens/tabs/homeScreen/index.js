@@ -3,16 +3,19 @@ import {Pressable, ScrollView, StatusBar, View} from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {useTranslation} from 'react-i18next';
 import {Icon, StyledText} from '../../../components/atoms';
-import {COLORS} from '../../../constants';
+import {COLORS, NAVIGATION} from '../../../constants';
 import ComingSoonBanner from './components/ComingSoonBanner';
 import ServiceCard from './components/ServiceCard';
 import {LOCATION, SERVICES} from './data';
 import styles from './styles';
+import { useNavigation } from '@react-navigation/native';
 
 const HomeScreen = () => {
   const {t} = useTranslation();
   const insets = useSafeAreaInsets();
   const isServiceable = LOCATION.isServiceable;
+  const navigation = useNavigation();
+
 
   const handleNotify = useCallback(() => {
     // Notify via WhatsApp will be wired later
@@ -23,8 +26,8 @@ const HomeScreen = () => {
   }, []);
 
   const handleProfilePress = useCallback(() => {
-    // Profile navigation will be wired later
-  }, []);
+    navigation.navigate(NAVIGATION.STACKS.COMMON, {screen: NAVIGATION.COMMON.PROFILE_SCREEN});
+  }, [navigation]);
 
   const handleLocationPress = useCallback(() => {
     // Location picker will be wired later
@@ -32,7 +35,6 @@ const HomeScreen = () => {
 
   return (
     <View style={styles.root}>
-      <StatusBar barStyle="light-content" backgroundColor={COLORS.PRIMARY} />
 
       <View style={[styles.header, {paddingTop: insets.top + 10}]}>
         <Pressable

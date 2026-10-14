@@ -64,7 +64,11 @@
         "PRIVACY": "Privacy policy",
         "DELETE_ACCOUNT": "Request account deletion",
         "LOG_OUT": "Log out",
-        "APP_VERSION": "APP VERSION: {{version}}"
+        "APP_VERSION": "APP VERSION: {{version}}",
+        "LOGOUT_CONFIRMATION": "Logout confirmation",
+        "LOGOUT_CONFIRMATION_MESSAGE": "Are you sure you want to logout?",
+        "CANCEL": "Cancel",
+        "LOGOUT": "Logout"
     },
     "PROFILE_DETAILS_SCREEN": {
         "TITLE": "Profile details",

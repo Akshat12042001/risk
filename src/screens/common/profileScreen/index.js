@@ -6,6 +6,10 @@ import {useTranslation} from 'react-i18next';
 import {Icon, ScreenContainer, StyledText} from '../../../components/atoms';
 import {COLORS, NAVIGATION} from '../../../constants';
 import styles from './styles';
+import {useDispatch, useSelector} from 'react-redux';
+import {makeLogoutRequest} from '../../../api/auth';
+import {errorToast, showAlert} from '../../../utils/alerts';
+import {reset} from '../../../redux/auth/auth.reducer';
 
 const WHATSAPP_GREEN = '#25D366';
 const ICON_COLOR = '#3F4A5A';
@@ -20,6 +24,8 @@ const ProfileScreen = () => {
   const {t} = useTranslation();
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
+  const user = useSelector(state => state.auth.user?.user);
+  const dispatch = useDispatch();
 
   const handleBack = useCallback(() => {
     if (navigation.canGoBack()) {
@@ -31,6 +37,10 @@ const ProfileScreen = () => {
     navigation.navigate(NAVIGATION.STACKS.TABS, {
       screen: NAVIGATION.TABS.BOOKINGS_SCREEN,
     });
+  }, [navigation]);
+
+  const handleEditProfile = useCallback(() => {
+    navigation.navigate(NAVIGATION.COMMON.USER_DETAIL_SCREEN);
   }, [navigation]);
 
   const menuItems = [
@@ -66,14 +76,41 @@ const ProfileScreen = () => {
     },
   ];
 
+  const onMenuPress = useCallback(
+    item => () => {
+      switch (item.key) {
+        case 'logout':
+          showAlert({
+            title: t('PROFILE_SCREEN.LOGOUT_CONFIRMATION'),
+            message: t('PROFILE_SCREEN.LOGOUT_CONFIRMATION_MESSAGE'),
+            onSuccess: handleLogout,
+            onCancel: () => {},
+            isConfirmationPopup: true,
+            t: t,
+          });
+          break;
+        default:
+          break;
+      }
+    },
+    [handleLogout],
+  );
+
+  const handleLogout = useCallback(async () => {
+    try {
+      const response = await makeLogoutRequest();
+      successToast(response.message);
+    } catch (error) {
+    } finally {
+      dispatch(reset());
+    }
+  }, []);
+
   return (
-    <ScreenContainer>
+    <ScreenContainer noPaddingBottom noPaddingTop>
       <View style={[styles.header, {paddingTop: insets.top + 8}]}>
         <View style={styles.headerTop}>
-          <Pressable
-            style={styles.backButton}
-            onPress={handleBack}
-            hitSlop={8}>
+          <Pressable style={styles.backButton} onPress={handleBack} hitSlop={8}>
             <Icon name="arrow-back" size={24} color={COLORS.WHITE} />
           </Pressable>
           <StyledText
@@ -94,15 +131,18 @@ const ProfileScreen = () => {
               color={COLORS.WHITE}
               size={24}
               textStyle={styles.userName}>
-              {USER.name}
+              {user?.name || 'New User'}
             </StyledText>
             <StyledText
               color={COLORS.WHITE}
               size={14}
               textStyle={styles.userPhone}>
-              {USER.phone}
+              {user?.phone}
             </StyledText>
-            <Pressable style={styles.editRow} hitSlop={8}>
+            <Pressable
+              style={styles.editRow}
+              hitSlop={8}
+              onPress={handleEditProfile}>
               <StyledText
                 color={COLORS.PRIMARY}
                 size={14}
@@ -167,7 +207,7 @@ const ProfileScreen = () => {
         <View style={styles.listCard}>
           {menuItems.map((item, index) => (
             <View key={item.key}>
-              <Pressable style={styles.listRow}>
+              <Pressable style={styles.listRow} onPress={onMenuPress(item)}>
                 <View style={styles.listRowLeft}>
                   <Icon
                     name={item.icon}

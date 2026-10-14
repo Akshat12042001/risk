@@ -160,5 +160,6 @@ export default StyleSheet.create({
   },
   confirmButton: {
     backgroundColor: COLORS.PRIMARY,
+    marginBottom: 24,
   },
 });

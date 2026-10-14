@@ -57,7 +57,7 @@ export default StyleSheet.create({
   footer: {
     paddingHorizontal: SCREEN_PADDING,
     paddingTop: 8,
-    paddingBottom: 8,
+    paddingBottom: 24,
     backgroundColor: '#F4F6FB',
   },
   updateButton: {

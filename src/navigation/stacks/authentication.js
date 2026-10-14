@@ -18,12 +18,12 @@ export default () => {
         component={OtpScreen}
       />
       <Stack.Screen
-        name={NAVIGATION.COMMON.REFERRAL_CODE_SCREEN}
+        name={NAVIGATION.AUTH.REFERRAL_CODE_SCREEN}
         component={ReferralCodeScreen}
         options={{gestureEnabled: false}}
       />
       <Stack.Screen
-        name={NAVIGATION.COMMON.USER_DETAIL_SCREEN}
+        name={NAVIGATION.AUTH.USER_DETAIL_SCREEN}
         component={UserDetailScreen}
         options={{gestureEnabled: false}}
       />

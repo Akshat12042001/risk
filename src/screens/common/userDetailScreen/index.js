@@ -1,4 +1,4 @@
-import React, {useCallback, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {
   Alert,
   Image,
@@ -23,6 +23,8 @@ import {
 import {COLORS} from '../../../constants';
 import {errorToast} from '../../../utils/alerts';
 import styles from './styles';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { makeMeRequest } from '../../../api/auth';
 
 const IMAGE_PICKER_OPTIONS = {
   mediaType: 'photo',
@@ -35,7 +37,7 @@ const IMAGE_PICKER_OPTIONS = {
 
 const UserDetailScreen = () => {
   const {t} = useTranslation();
-
+  const insets = useSafeAreaInsets();
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [mobile, setMobile] = useState('8219840664');
@@ -44,6 +46,18 @@ const UserDetailScreen = () => {
 
   const handleUpdateProfile = useCallback(() => {
     // Update profile will be wired later
+  }, []);
+
+  useEffect(() => {
+    getUser();
+  }, [getUser]);
+
+  const getUser = useCallback(async () => {
+    try {
+      const response = await makeMeRequest();
+    } catch (error) {
+      errorToast(error.response.data.message);
+    }
   }, []);
 
   const applyPickedImage = useCallback(
@@ -113,7 +127,7 @@ const UserDetailScreen = () => {
   }, [openCamera, openGallery, t]);
 
   return (
-    <ScreenContainer>
+    <ScreenContainer noPaddingBottom noPaddingTop>
       <View style={styles.root}>
         <Header
           title={t('PROFILE_DETAILS_SCREEN.TITLE')}

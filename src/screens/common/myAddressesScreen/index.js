@@ -9,6 +9,7 @@ import {
 } from '../../../components/atoms';
 import {COLORS} from '../../../constants';
 import styles from './styles';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const SAVED_ADDRESSES = [
   {
@@ -25,7 +26,7 @@ const SAVED_ADDRESSES = [
 
 const MyAddressesScreen = () => {
   const {t} = useTranslation();
-
+  const insets = useSafeAreaInsets();
   const handleAddAddress = useCallback(() => {
     // Add address flow will be wired later
   }, []);
@@ -35,7 +36,7 @@ const MyAddressesScreen = () => {
   }, []);
 
   return (
-    <ScreenContainer>
+    <ScreenContainer noPaddingBottom noPaddingTop>
       <View style={styles.root}>
         <Header title={t('MY_ADDRESSES_SCREEN.TITLE')} />
 

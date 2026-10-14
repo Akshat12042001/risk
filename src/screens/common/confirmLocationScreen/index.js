@@ -23,6 +23,7 @@ import {COLORS} from '../../../constants';
 import {errorToast} from '../../../utils/alerts';
 import {getAddressFromCoords} from '../../../utils/location';
 import styles from './styles';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const DEFAULT_COORDINATE = {
   latitude: 30.7046,
@@ -42,6 +43,7 @@ const REGION_DELTA = {
 
 const ConfirmLocationScreen = () => {
   const {t} = useTranslation();
+  const insets = useSafeAreaInsets();
   const mapRef = useRef(null);
   const skipGeocodeRef = useRef(false);
   const geocodeRequestId = useRef(0);
@@ -221,7 +223,7 @@ const ConfirmLocationScreen = () => {
   }, []);
 
   return (
-    <ScreenContainer>
+    <ScreenContainer noPaddingBottom noPaddingTop>
       <View style={styles.root}>
         <Header title={t('CONFIRM_LOCATION_SCREEN.TITLE')} />
 

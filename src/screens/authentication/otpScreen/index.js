@@ -11,7 +11,11 @@ import {
 } from '../../../components/atoms';
 import {COLORS, NAVIGATION} from '../../../constants';
 import styles from './styles';
-
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { makeOTPRequest, verifyOTPRequest } from '../../../api/auth';
+import { errorToast, successToast } from '../../../utils/alerts';
+import { useDispatch } from 'react-redux';
+import { setUser } from '../../../redux/auth/auth.reducer';
 const OTP_LENGTH = 6;
 const RESEND_SECONDS = 40;
 
@@ -30,13 +34,15 @@ const OtpScreen = () => {
   const {t} = useTranslation();
   const navigation = useNavigation();
   const route = useRoute();
-  const inputRef = useRef(null);
+const dispatch = useDispatch();
 
+  const inputRef = useRef(null);
+  const insets = useSafeAreaInsets();
   const phone = route.params?.phone || '';
   const [otp, setOtp] = useState('');
   const [secondsLeft, setSecondsLeft] = useState(RESEND_SECONDS);
   const [isFocused, setIsFocused] = useState(false);
-
+  const [isLoading, setIsLoading] = useState(false);
   const isOtpComplete = otp.length === OTP_LENGTH;
   const canResend = secondsLeft === 0;
 
@@ -60,29 +66,51 @@ const OtpScreen = () => {
     setOtp(digitsOnly);
   }, []);
 
-  const handleResend = useCallback(() => {
+  const handleResend = useCallback(async () => {
     if (!canResend) {
       return;
     }
-    setOtp('');
-    setSecondsLeft(RESEND_SECONDS);
-    inputRef.current?.focus();
+    try {
+      setIsLoading(true);
+      const response = await makeOTPRequest(phone);
+      successToast(response.message);
+      setOtp('');
+      setSecondsLeft(RESEND_SECONDS);
+      inputRef.current?.focus();
+    } catch (error) {
+      errorToast(error.response.data.message);
+    } finally {
+      setIsLoading(false);
+    }
   }, [canResend]);
 
-  const handleDone = useCallback(() => {
+  const handleDone = useCallback(async () => {
     if (!isOtpComplete) {
       return;
     }
-    navigation.navigate(NAVIGATION.AUTH.REFERRAL_CODE_SCREEN);
+    try {
+      setIsLoading(true);
+      const response = await verifyOTPRequest(phone, otp);
+      successToast(response.message);
+      if(response?.data?.user?.isNewUser){
+        navigation.navigate(NAVIGATION.AUTH.REFERRAL_CODE_SCREEN);
+      } else {
+        dispatch(setUser(response.data));
+      }
+    } catch (error) {
+      errorToast(error.response.data.message);
+    } finally {
+      setIsLoading(false);
+    }
     // OTP submit will be wired to API later
   }, [isOtpComplete]);
 
   const focusedIndex = Math.min(otp.length, OTP_LENGTH - 1);
 
   return (
-    <ScreenContainer>
+    <ScreenContainer noPaddingBottom noPaddingTop>
       <View style={styles.root}>
-        <View style={styles.header}>
+        <View style={[styles.header, {paddingTop: insets.top}]}>
           <Pressable
             style={styles.backButton}
             onPress={() => navigation.goBack()}
@@ -181,6 +209,7 @@ const OtpScreen = () => {
             onPress={handleDone}
             disabled={!isOtpComplete}
             textSize={16}
+            loading={isLoading}
           />
         </View>
       </View>

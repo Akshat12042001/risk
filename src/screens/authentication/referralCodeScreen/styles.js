@@ -54,7 +54,7 @@ export default StyleSheet.create({
   },
   footer: {
     paddingHorizontal: SCREEN_PADDING,
-    paddingBottom: 8,
+    paddingBottom: 24,
     paddingTop: 12,
     backgroundColor: COLORS.WHITE,
   },

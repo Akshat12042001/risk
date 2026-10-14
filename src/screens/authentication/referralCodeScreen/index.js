@@ -12,10 +12,12 @@ import {
 } from '../../../components/atoms';
 import {COLORS, NAVIGATION} from '../../../constants';
 import styles from './styles';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const ReferralCodeScreen = () => {
   const {t} = useTranslation();
   const navigation = useNavigation();
+  const insets = useSafeAreaInsets();
   const [referralCode, setReferralCode] = useState('');
 
   useFocusEffect(
@@ -40,10 +42,9 @@ const ReferralCodeScreen = () => {
   };
 
   return (
-    <ScreenContainer>
-      <StatusBar barStyle="dark-content" backgroundColor={COLORS.WHITE} />
+    <ScreenContainer noPaddingBottom noPaddingTop>
 
-      <View style={styles.root}>
+      <View style={[styles.root, {paddingTop: insets.top}]}>
         <KeyboardAwareScrollView
           enableOnAndroid
           keyboardShouldPersistTaps="handled"

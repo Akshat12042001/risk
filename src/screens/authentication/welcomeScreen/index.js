@@ -12,8 +12,10 @@ import MarqueeRow from './components/MarqueeRow';
 import styles from './styles';
 import {useTranslation} from 'react-i18next';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
-import { useNavigation } from '@react-navigation/native';
-import { errorToast } from '../../../utils/alerts';
+import {useNavigation} from '@react-navigation/native';
+import {errorToast, successToast} from '../../../utils/alerts';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import {makeOTPRequest} from '../../../api/auth';
 
 const ROW_1_IMAGES = [
   'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=400&q=80',
@@ -46,21 +48,36 @@ const FADE_STOPS = [
 const WelcomeScreen = () => {
   const {t} = useTranslation();
   const navigation = useNavigation();
+  const insets = useSafeAreaInsets();
+
   const [phone, setPhone] = useState('');
   const [whatsappOptIn, setWhatsappOptIn] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
 
   const brandName = Config.NAME || 'Pronto';
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
+    if (isLoading) {
+      return;
+    }
     if (phone.length !== 10) {
       errorToast(t('Please enter a valid phone number'));
       return;
     }
-    navigation.navigate(NAVIGATION.AUTH.OTP_SCREEN, {phone});
+    try {
+      setIsLoading(true);
+      const response = await makeOTPRequest(phone);
+      successToast(response.message);
+      navigation.navigate(NAVIGATION.AUTH.OTP_SCREEN, {phone});
+    } catch (error) {
+      errorToast(error.message);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
-    <ScreenContainer>
+    <ScreenContainer noPaddingBottom noPaddingTop>
       <KeyboardAwareScrollView
         enableOnAndroid
         enableAutomaticScroll
@@ -69,7 +86,7 @@ const WelcomeScreen = () => {
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={styles.root}
         showsVerticalScrollIndicator={false}>
-        <View style={styles.header}>
+        <View style={[styles.header, {paddingTop: insets.top}]}>
           <Pressable style={styles.skipButton} hitSlop={8}>
             <StyledText
               color={COLORS.WHITE}
@@ -170,6 +187,7 @@ const WelcomeScreen = () => {
             title={t('WELCOME_SCREEN.CONTINUE')}
             style={styles.continueButton}
             onPress={handleContinue}
+            loading={isLoading}
           />
 
           <StyledText
