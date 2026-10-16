@@ -9,10 +9,7 @@ import {
 } from 'react-native';
 import {useTranslation} from 'react-i18next';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
-import {
-  launchCamera,
-  launchImageLibrary,
-} from 'react-native-image-picker';
+import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
 import {
   Button,
   Header,
@@ -21,10 +18,12 @@ import {
   ScreenContainer,
 } from '../../../components/atoms';
 import {COLORS} from '../../../constants';
-import {errorToast} from '../../../utils/alerts';
+import {errorToast, successToast} from '../../../utils/alerts';
 import styles from './styles';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { makeMeRequest } from '../../../api/auth';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import {makeMeRequest, makeUpdateProfileRequest} from '../../../api/auth';
+import { setUser } from '../../../redux/auth/auth.reducer';
+import { useDispatch, useSelector } from 'react-redux';
 
 const IMAGE_PICKER_OPTIONS = {
   mediaType: 'photo',
@@ -43,22 +42,52 @@ const UserDetailScreen = () => {
   const [mobile, setMobile] = useState('8219840664');
   const [email, setEmail] = useState('');
   const [profileImage, setProfileImage] = useState(null);
-
-  const handleUpdateProfile = useCallback(() => {
-    // Update profile will be wired later
-  }, []);
-
-  useEffect(() => {
-    getUser();
-  }, [getUser]);
+  const [isLoading, setIsLoading] = useState(false);
+  const dispatch = useDispatch();
+  const user = useSelector(state => state.auth.user);
 
   const getUser = useCallback(async () => {
     try {
       const response = await makeMeRequest();
+      setFirstName(response?.data?.user?.firstName);
+      setLastName(response?.data?.user?.lastName);
+      setMobile(response?.data?.user?.phone);
+      setEmail(response?.data?.user?.email);
+      setProfileImage(response?.data?.user?.profileImage);
     } catch (error) {
       errorToast(error.response.data.message);
     }
   }, []);
+
+  const handleUpdateProfile = useCallback(async () => {
+    if (isLoading) {
+      return;
+    }
+    try {
+      setIsLoading(true);
+      const response = await makeUpdateProfileRequest('', {
+        firstName: firstName,
+        lastName: lastName,
+        email: email,
+      });
+      successToast(response?.message);
+      dispatch(
+        setUser({
+          token: user?.token,
+          user: response?.data?.user,
+        }),
+      );
+      getUser();
+    } catch (error) {
+      errorToast(error.response.data.message);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [email, firstName, getUser, isLoading, lastName, user?.token, dispatch]);
+
+  useEffect(() => {
+    getUser();
+  }, [getUser]);
 
   const applyPickedImage = useCallback(
     result => {
@@ -187,6 +216,7 @@ const UserDetailScreen = () => {
               keyboardType="phone-pad"
               maxLength={10}
               style={styles.input}
+              editable={false}
             />
 
             <Input
@@ -206,6 +236,7 @@ const UserDetailScreen = () => {
             title={t('PROFILE_DETAILS_SCREEN.UPDATE')}
             onPress={handleUpdateProfile}
             style={styles.updateButton}
+            loading={isLoading}
           />
         </View>
       </View>

@@ -1,6 +1,10 @@
 import React, {useCallback, useState} from 'react';
 import {BackHandler, StatusBar, View} from 'react-native';
-import {useFocusEffect, useNavigation} from '@react-navigation/native';
+import {
+  useFocusEffect,
+  useNavigation,
+  useRoute,
+} from '@react-navigation/native';
 import {useTranslation} from 'react-i18next';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import {
@@ -12,13 +16,16 @@ import {
 } from '../../../components/atoms';
 import {COLORS, NAVIGATION} from '../../../constants';
 import styles from './styles';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import {makeUpdateProfileRequest} from '../../../api/auth';
 
 const ReferralCodeScreen = () => {
   const {t} = useTranslation();
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
   const [referralCode, setReferralCode] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const {token} = useRoute().params;
 
   useFocusEffect(
     useCallback(() => {
@@ -31,19 +38,36 @@ const ReferralCodeScreen = () => {
     }, []),
   );
 
-  const handleContinue = () => {
-    // Continue with referral code will be wired later
-    navigation.navigate(NAVIGATION.COMMON.USER_DETAIL_SCREEN);
+  const handleContinue = async () => {
+    if (isLoading) {
+      return;
+    }
+    try {
+      setIsLoading(true);
+      await makeUpdateProfileRequest(token, {
+        referralCode: referralCode,
+      });
+      navigation.navigate(NAVIGATION.AUTH.USER_DETAIL_SCREEN, {
+        token,
+      });
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleSkip = () => {
-    // Skip flow will be wired later
-    navigation.navigate(NAVIGATION.COMMON.USER_DETAIL_SCREEN);
+    if (isLoading) {
+      return;
+    }
+    navigation.navigate(NAVIGATION.AUTH.USER_DETAIL_SCREEN, {
+      token,
+    });
   };
 
   return (
     <ScreenContainer noPaddingBottom noPaddingTop>
-
       <View style={[styles.root, {paddingTop: insets.top}]}>
         <KeyboardAwareScrollView
           enableOnAndroid
@@ -74,10 +98,7 @@ const ReferralCodeScreen = () => {
             />
           </View>
 
-          <StyledText
-            color={COLORS.BLACK}
-            size={28}
-            textStyle={styles.title}>
+          <StyledText color={COLORS.BLACK} size={28} textStyle={styles.title}>
             {t('REFERRAL_CODE_SCREEN.TITLE')}
           </StyledText>
 
@@ -103,6 +124,7 @@ const ReferralCodeScreen = () => {
             title={t('REFERRAL_CODE_SCREEN.CONTINUE')}
             onPress={handleContinue}
             style={styles.continueButton}
+            loading={isLoading}
           />
           <Button
             title={t('REFERRAL_CODE_SCREEN.SKIP')}
@@ -110,6 +132,7 @@ const ReferralCodeScreen = () => {
             textColor={COLORS.PRIMARY}
             style={styles.skipButton}
             textStyle={styles.skipLabel}
+            disabled={isLoading}
           />
         </View>
       </View>

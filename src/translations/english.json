@@ -100,6 +100,24 @@
         "FETCHING_ADDRESS": "Fetching address...",
         "LOCATION_ERROR": "Unable to fetch your location"
     },
+    "ADD_ADDRESS_DETAIL_SCREEN": {
+        "TITLE": "Add address details",
+        "ADDRESS_DETAILS": "Address details",
+        "SAVE_AS": "Save address as",
+        "HOME": "Home",
+        "OTHER": "Other",
+        "FLAT_NO": "Flat/House No.*",
+        "FLOOR": "Floor (Optional)",
+        "BUILDING": "Apartment / Building name*",
+        "LANDMARK": "Nearby Landmark (Optional)",
+        "AREA_LABEL": "Area/Sector/Locality*",
+        "CHANGE": "Change",
+        "RECEIVER_DETAILS": "Receiver details",
+        "RECEIVER_SUBTITLE": "Our professional will reach out to you on this number.",
+        "RECEIVER_PHONE": "Receiver's phone number*",
+        "RECEIVER_NAME": "Receiver's name*",
+        "SAVE": "Save address"
+    },
     "PLACEHOLDERS": {
         "OK": "OK",
         "NO": "No",

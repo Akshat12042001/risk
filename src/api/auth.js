@@ -4,7 +4,8 @@ const ENDPOINTS={
   SEND_OTP:"/auth/send-otp",
   VERIFY_OTP:"/auth/verify-otp",
   ME:"/auth/me",
-  LOGOUT:"/auth/logout"
+  LOGOUT:"/auth/logout",
+  UPDATE_PROFILE:"/users/me"
 }
 
 export const makeOTPRequest = async (phone) => {
@@ -29,5 +30,10 @@ export const makeMeRequest = async () => {
 
 export const makeLogoutRequest = async () => {
   const response = await APIClient().post(ENDPOINTS.LOGOUT);
+  return response.data;
+};
+
+export const makeUpdateProfileRequest = async (token = "", data) => {
+  const response = await APIClient(token).patch(ENDPOINTS.UPDATE_PROFILE, data);
   return response.data;
 };

@@ -6,6 +6,7 @@ import {
   UserDetailScreen,
   MyAddressesScreen,
   ConfirmLocationScreen,
+  AddAddressDetailScreen,
 } from '../../screens/common';
 import config from '../config';
 
@@ -29,6 +30,10 @@ export default () => {
       <Stack.Screen
         name={NAVIGATION.COMMON.CONFIRM_LOCATION_SCREEN}
         component={ConfirmLocationScreen}
+      />
+      <Stack.Screen
+        name={NAVIGATION.COMMON.ADD_ADDRESS_DETAIL_SCREEN}
+        component={AddAddressDetailScreen}
       />
     </Stack.Navigator>
   );

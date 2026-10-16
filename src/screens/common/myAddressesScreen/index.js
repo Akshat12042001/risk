@@ -1,4 +1,4 @@
-import React, {useCallback} from 'react';
+import React, {useCallback, useEffect } from 'react';
 import {Pressable, ScrollView, View} from 'react-native';
 import {useTranslation} from 'react-i18next';
 import {
@@ -7,9 +7,11 @@ import {
   ScreenContainer,
   StyledText,
 } from '../../../components/atoms';
-import {COLORS} from '../../../constants';
+import {COLORS, NAVIGATION} from '../../../constants';
 import styles from './styles';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import {useNavigation} from '@react-navigation/native';
+import { makeGetAddressesRequest } from '../../../api/common';
 
 const SAVED_ADDRESSES = [
   {
@@ -27,13 +29,27 @@ const SAVED_ADDRESSES = [
 const MyAddressesScreen = () => {
   const {t} = useTranslation();
   const insets = useSafeAreaInsets();
+  const navigation = useNavigation();
   const handleAddAddress = useCallback(() => {
-    // Add address flow will be wired later
-  }, []);
+    navigation.navigate(NAVIGATION.COMMON.CONFIRM_LOCATION_SCREEN);
+  }, [navigation]);
 
   const handleEditAddress = useCallback(() => {
     // Edit address flow will be wired later
   }, []);
+
+  const handleGetAddresses = useCallback(async () => {
+    try {
+      const response = await makeGetAddressesRequest();
+      console.log(response);
+    } catch (error) {
+      console.log(error); 
+    }
+  }, []);
+
+  useEffect(() => {
+    handleGetAddresses();
+  }, [handleGetAddresses]);
 
   return (
     <ScreenContainer noPaddingBottom noPaddingTop>

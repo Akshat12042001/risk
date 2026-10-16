@@ -14,6 +14,8 @@ const Stack = createStackNavigator();
 const AppNavigator = () => {
   const isLoggedIn = useSelector(state => state.auth.isLoggedIn);
 
+  console.log(isLoggedIn);
+
   const handleNavigationRef = useCallback(ref => {
     NavigationService.setNavigatorRef(ref);
   }, []);

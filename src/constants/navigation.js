@@ -15,6 +15,7 @@ export default {
     USER_DETAIL_SCREEN: 'Common-UserDetailScreen',
     MY_ADDRESSES_SCREEN: 'Common-MyAddressesScreen',
     CONFIRM_LOCATION_SCREEN: 'Common-ConfirmLocationScreen',
+    ADD_ADDRESS_DETAIL_SCREEN: 'Common-AddAddressDetailScreen',
   },
   TABS: {
     HOME_SCREEN: 'Tabs-HomeScreen',

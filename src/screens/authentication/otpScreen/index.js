@@ -93,7 +93,9 @@ const dispatch = useDispatch();
       const response = await verifyOTPRequest(phone, otp);
       successToast(response.message);
       if(response?.data?.user?.isNewUser){
-        navigation.navigate(NAVIGATION.AUTH.REFERRAL_CODE_SCREEN);
+        navigation.navigate(NAVIGATION.AUTH.REFERRAL_CODE_SCREEN, {
+          token : response.data.token,
+        });
       } else {
         dispatch(setUser(response.data));
       }

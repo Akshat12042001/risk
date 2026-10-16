@@ -1,16 +1,17 @@
-import React, {useCallback, useRef, useState} from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {
   ActivityIndicator,
+  FlatList,
   Keyboard,
   PermissionsAndroid,
   Platform,
   Pressable,
+  TextInput,
   View,
 } from 'react-native';
 import {useTranslation} from 'react-i18next';
 import Config from 'react-native-config';
-import MapView, {PROVIDER_GOOGLE} from 'react-native-maps';
-import {GooglePlacesAutocomplete} from 'react-native-google-places-autocomplete';
+import MapView, {Marker, PROVIDER_GOOGLE} from 'react-native-maps';
 import Geolocation from '@react-native-community/geolocation';
 import {
   Button,
@@ -19,11 +20,16 @@ import {
   ScreenContainer,
   StyledText,
 } from '../../../components/atoms';
-import {COLORS} from '../../../constants';
+import {COLORS, NAVIGATION} from '../../../constants';
 import {errorToast} from '../../../utils/alerts';
-import {getAddressFromCoords} from '../../../utils/location';
+import {
+  getAddressFromCoords,
+  getPlaceDetails,
+  searchPlaces,
+} from '../../../utils/location';
 import styles from './styles';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import { useNavigation } from '@react-navigation/native';
 
 const DEFAULT_COORDINATE = {
   latitude: 30.7046,
@@ -47,14 +53,21 @@ const ConfirmLocationScreen = () => {
   const mapRef = useRef(null);
   const skipGeocodeRef = useRef(false);
   const geocodeRequestId = useRef(0);
+  const navigation = useNavigation();
 
   const apiKey =
     Config.GOOGLE_MAPS_API_KEY || 'AIzaSyBteSXgeCh5tcLGtCGTAH762pkqvdnaDzk';
 
   const [selectedLocation, setSelectedLocation] = useState(DEFAULT_LOCATION);
+  const [pinCoordinate, setPinCoordinate] = useState(DEFAULT_COORDINATE);
   const [mapSize, setMapSize] = useState(null);
   const [isMapMoving, setIsMapMoving] = useState(false);
   const [isFetchingAddress, setIsFetchingAddress] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [placeSuggestions, setPlaceSuggestions] = useState([]);
+  const [isSearchingPlaces, setIsSearchingPlaces] = useState(false);
+  const searchRequestId = useRef(0);
+  const skipSearchRef = useRef(false);
 
   const handleMapLayout = useCallback(event => {
     const {width, height} = event.nativeEvent.layout;
@@ -130,13 +143,21 @@ const ConfirmLocationScreen = () => {
     [apiKey, t],
   );
 
-  const handleRegionChange = useCallback(() => {
+  const handleRegionChange = useCallback(region => {
     setIsMapMoving(true);
+    setPinCoordinate({
+      latitude: region.latitude,
+      longitude: region.longitude,
+    });
   }, []);
 
   const handleRegionChangeComplete = useCallback(
     region => {
       setIsMapMoving(false);
+      setPinCoordinate({
+        latitude: region.latitude,
+        longitude: region.longitude,
+      });
 
       if (skipGeocodeRef.current) {
         skipGeocodeRef.current = false;
@@ -152,36 +173,100 @@ const ConfirmLocationScreen = () => {
     event => {
       const {latitude, longitude} = event.nativeEvent.coordinate;
       Keyboard.dismiss();
+      setPinCoordinate({latitude, longitude});
       animateTo(latitude, longitude, {skipGeocode: true});
       reverseGeocode(latitude, longitude);
     },
     [animateTo, reverseGeocode],
   );
 
-  const handlePlaceSelect = useCallback(
-    (data, details = null) => {
-      Keyboard.dismiss();
-      const location = details?.geometry?.location;
-      if (!location) {
-        return;
+  useEffect(() => {
+    if (skipSearchRef.current) {
+      skipSearchRef.current = false;
+      setPlaceSuggestions([]);
+      setIsSearchingPlaces(false);
+      return;
+    }
+
+    const trimmedQuery = searchQuery.trim();
+    if (trimmedQuery.length < 2) {
+      setPlaceSuggestions([]);
+      setIsSearchingPlaces(false);
+      return;
+    }
+
+    const requestId = ++searchRequestId.current;
+    const timer = setTimeout(async () => {
+      try {
+        setIsSearchingPlaces(true);
+        const results = await searchPlaces(trimmedQuery, apiKey);
+        if (requestId !== searchRequestId.current) {
+          return;
+        }
+        setPlaceSuggestions(results);
+      } catch (error) {
+        if (requestId !== searchRequestId.current) {
+          return;
+        }
+        setPlaceSuggestions([]);
+        errorToast(error.message || t('CONFIRM_LOCATION_SCREEN.LOCATION_ERROR'));
+      } finally {
+        if (requestId === searchRequestId.current) {
+          setIsSearchingPlaces(false);
+        }
       }
+    }, 350);
 
-      const latitude = location.lat;
-      const longitude = location.lng;
-      const title =
-        data?.structured_formatting?.main_text ||
-        data?.description?.split(',')[0] ||
-        t('CONFIRM_LOCATION_SCREEN.SELECTED_LOCATION');
+    return () => clearTimeout(timer);
+  }, [apiKey, searchQuery, t]);
 
-      setSelectedLocation({
-        title,
-        address: details?.formatted_address || data?.description || '',
-        latitude,
-        longitude,
-      });
-      animateTo(latitude, longitude, {skipGeocode: true});
+  const handlePlaceSelect = useCallback(
+    async place => {
+      Keyboard.dismiss();
+      skipSearchRef.current = true;
+      searchRequestId.current += 1;
+      setPlaceSuggestions([]);
+      setIsSearchingPlaces(false);
+      setSearchQuery(place.mainText || place.description);
+
+      try {
+        const details = await getPlaceDetails(place.placeId, apiKey);
+        if (!details?.latitude || !details?.longitude) {
+          return;
+        }
+
+        setSelectedLocation({
+          title:
+            details.title ||
+            place.mainText ||
+            t('CONFIRM_LOCATION_SCREEN.SELECTED_LOCATION'),
+          address: details.address || place.description || '',
+          latitude: details.latitude,
+          longitude: details.longitude,
+        });
+        setPinCoordinate({
+          latitude: details.latitude,
+          longitude: details.longitude,
+        });
+        animateTo(details.latitude, details.longitude, {skipGeocode: true});
+      } catch (error) {
+        errorToast(error.message || t('CONFIRM_LOCATION_SCREEN.LOCATION_ERROR'));
+      }
     },
-    [animateTo, t],
+    [animateTo, apiKey, t],
+  );
+
+  const renderPlaceSuggestion = useCallback(
+    ({item}) => (
+      <Pressable
+        style={styles.placesRow}
+        onPress={() => handlePlaceSelect(item)}>
+        <StyledText color={COLORS.BLACK} size={14} numberOfLines={2}>
+          {item.description}
+        </StyledText>
+      </Pressable>
+    ),
+    [handlePlaceSelect],
   );
 
   const requestLocationPermission = useCallback(async () => {
@@ -204,6 +289,7 @@ const ConfirmLocationScreen = () => {
     Geolocation.getCurrentPosition(
       position => {
         const {latitude, longitude} = position.coords;
+        setPinCoordinate({latitude, longitude});
         animateTo(latitude, longitude, {skipGeocode: true});
         reverseGeocode(latitude, longitude);
       },
@@ -218,9 +304,19 @@ const ConfirmLocationScreen = () => {
     );
   }, [animateTo, requestLocationPermission, reverseGeocode, t]);
 
-  const handleConfirm = useCallback(() => {
-    // Confirm location will be wired later
+  const handleClearSearch = useCallback(() => {
+    setSearchQuery('');
+    setPlaceSuggestions([]);
+    setIsSearchingPlaces(false);
   }, []);
+
+  const handleConfirm = useCallback(() => {
+    navigation.navigate(NAVIGATION.COMMON.ADD_ADDRESS_DETAIL_SCREEN, {
+      address: selectedLocation.address,
+      latitude: selectedLocation.latitude,
+      longitude: selectedLocation.longitude,
+    });
+  }, [navigation, selectedLocation]);
 
   return (
     <ScreenContainer noPaddingBottom noPaddingTop>
@@ -249,41 +345,14 @@ const ConfirmLocationScreen = () => {
               moveOnMarkerPress={false}
               onPress={handleMapPress}
               onRegionChange={handleRegionChange}
-              onRegionChangeComplete={handleRegionChangeComplete}
-            />
+              onRegionChangeComplete={handleRegionChangeComplete}>
+              <Marker
+                coordinate={pinCoordinate}
+                pinColor={COLORS.PRIMARY}
+                tracksViewChanges={false}
+              />
+            </MapView>
           ) : null}
-
-          <View pointerEvents="none" style={styles.centerPinWrap}>
-            <View
-              style={[
-                styles.callout,
-                isMapMoving && styles.calloutHidden,
-              ]}>
-              <StyledText
-                color={COLORS.WHITE}
-                size={12}
-                textStyle={styles.calloutTitle}>
-                {t('CONFIRM_LOCATION_SCREEN.SET_AS_LOCATION')}
-              </StyledText>
-              <StyledText
-                color={COLORS.WHITE}
-                size={14}
-                textStyle={styles.calloutSubtitle}
-                numberOfLines={1}>
-                {isFetchingAddress
-                  ? t('CONFIRM_LOCATION_SCREEN.FETCHING_ADDRESS')
-                  : selectedLocation.title}
-              </StyledText>
-            </View>
-            <View
-              style={[
-                styles.centerPin,
-                isMapMoving && styles.centerPinRaised,
-              ]}>
-              <Icon name="place" size={44} color={COLORS.PRIMARY} />
-            </View>
-            <View style={styles.centerPinShadow} />
-          </View>
 
           <View style={styles.searchWrap} pointerEvents="box-none">
             <Icon
@@ -292,30 +361,37 @@ const ConfirmLocationScreen = () => {
               color={COLORS.PRIMARY}
               style={styles.searchIcon}
             />
-            <GooglePlacesAutocomplete
-              placeholder={t('CONFIRM_LOCATION_SCREEN.SEARCH_PLACEHOLDER')}
-              fetchDetails
-              enablePoweredByContainer={false}
-              debounce={300}
-              keyboardShouldPersistTaps="handled"
-              onPress={handlePlaceSelect}
-              query={{
-                key: apiKey,
-                language: 'en',
-                components: 'country:in',
-              }}
-              textInputProps={{
-                placeholderTextColor: COLORS.GRAY_LIGHT,
-                returnKeyType: 'search',
-              }}
-              styles={{
-                container: styles.placesContainer,
-                textInput: styles.placesInput,
-                listView: styles.placesList,
-                row: styles.placesRow,
-                description: styles.placesDescription,
-              }}
-            />
+            <View style={styles.placesContainer}>
+              <TextInput
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+                placeholder={t('CONFIRM_LOCATION_SCREEN.SEARCH_PLACEHOLDER')}
+                placeholderTextColor={COLORS.GRAY_LIGHT}
+                returnKeyType="search"
+                style={styles.placesInput}
+              />
+              {isSearchingPlaces ? (
+                <View style={styles.placesLoading}>
+                  <ActivityIndicator size="small" color={COLORS.PRIMARY} />
+                </View>
+              ) : searchQuery.length > 0 ? (
+                <Pressable
+                  style={styles.clearButton}
+                  onPress={handleClearSearch}
+                  hitSlop={8}>
+                  <Icon name="close" size={20} color={COLORS.GRAY} />
+                </Pressable>
+              ) : null}
+              {placeSuggestions.length > 0 ? (
+                <FlatList
+                  data={placeSuggestions}
+                  keyExtractor={item => item.placeId}
+                  renderItem={renderPlaceSuggestion}
+                  keyboardShouldPersistTaps="handled"
+                  style={styles.placesList}
+                />
+              ) : null}
+            </View>
           </View>
 
           <Pressable

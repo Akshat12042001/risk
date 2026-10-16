@@ -89,6 +89,9 @@ const ProfileScreen = () => {
             t: t,
           });
           break;
+          case 'addresses':
+            navigation.navigate(NAVIGATION.COMMON.MY_ADDRESSES_SCREEN);
+            break;
         default:
           break;
       }

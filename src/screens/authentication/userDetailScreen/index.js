@@ -1,6 +1,6 @@
 import React, {useCallback, useState} from 'react';
 import {BackHandler, StatusBar, Text, View} from 'react-native';
-import {useFocusEffect} from '@react-navigation/native';
+import {useFocusEffect, useRoute} from '@react-navigation/native';
 import {useTranslation} from 'react-i18next';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import {
@@ -11,7 +11,10 @@ import {
 } from '../../../components/atoms';
 import {COLORS} from '../../../constants';
 import styles from './styles';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import {makeUpdateProfileRequest} from '../../../api/auth';
+import {useDispatch, useSelector} from 'react-redux';
+import { setUser } from '../../../redux/auth/auth.reducer';
 
 const UserDetailScreen = () => {
   const {t} = useTranslation();
@@ -19,6 +22,9 @@ const UserDetailScreen = () => {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const {token} = useRoute().params;
+  const dispatch = useDispatch();
 
   useFocusEffect(
     useCallback(() => {
@@ -31,9 +37,28 @@ const UserDetailScreen = () => {
     }, []),
   );
 
-  const handleContinue = () => {
-    // User detail submit will be wired later
-    // navigation.navigate(NAVIGATION.COMMON.PROFILE_SCREEN);
+  const handleContinue = async () => {
+    if (isLoading) {
+      return;
+    }
+    try {
+      setIsLoading(true);
+      const response = await makeUpdateProfileRequest(token, {
+        firstName: firstName,
+        lastName: lastName,
+        email: email,
+      });
+      dispatch(
+        setUser({
+          token,
+          user: response?.data.user,
+        }),
+      );
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -90,6 +115,7 @@ const UserDetailScreen = () => {
             title={t('USER_DETAIL_SCREEN.CONTINUE')}
             onPress={handleContinue}
             disabled={!firstName.trim()}
+            loading={isLoading}
             style={styles.continueButton}
           />
         </View>
