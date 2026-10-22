@@ -88,6 +88,7 @@
         "TITLE": "My Addresses",
         "ADD": "Add addresses",
         "SAVED": "SAVED ADDRESSES",
+        "EMPTY": "No saved addresses",
         "CURRENTLY_SELECTED": "Currently selected",
         "EDIT": "EDIT",
         "DELETE": "DELETE",

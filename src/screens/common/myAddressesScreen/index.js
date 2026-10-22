@@ -114,6 +114,21 @@ const MyAddressesScreen = () => {
             {t('MY_ADDRESSES_SCREEN.SAVED')}
           </StyledText>
 
+          {addresses.length === 0 ? (
+            <View style={styles.emptyState}>
+              <View style={styles.emptyIconWrap}>
+                <Icon name="location-off" size={32} color={COLORS.PRIMARY} />
+              </View>
+              <StyledText
+                color={COLORS.GRAY}
+                size={16}
+                textAlign="center"
+                textStyle={styles.emptyText}>
+                {t('MY_ADDRESSES_SCREEN.EMPTY')}
+              </StyledText>
+            </View>
+          ) : null}
+
           {addresses.map(address => (
             <Pressable
               key={address.id}

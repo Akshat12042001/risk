@@ -50,7 +50,9 @@ const HomeScreen = () => {
   }, []);
 
   const handleChangeLocation = useCallback(() => {
-    // Location picker will be wired later
+    NavigationService.navigate(NAVIGATION.STACKS.COMMON, {
+      screen: NAVIGATION.COMMON.MY_ADDRESSES_SCREEN,
+    });
   }, []);
 
   const handleProfilePress = useCallback(() => {

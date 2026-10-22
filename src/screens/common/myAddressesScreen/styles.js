@@ -39,6 +39,24 @@ export default StyleSheet.create({
     letterSpacing: 0.8,
     marginBottom: 12,
   },
+  emptyState: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingTop: 48,
+    paddingHorizontal: 24,
+  },
+  emptyIconWrap: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    backgroundColor: '#CCFBF1',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+  },
+  emptyText: {
+    fontWeight: '500',
+  },
   addressCard: {
     backgroundColor: COLORS.WHITE,
     borderRadius: 14,

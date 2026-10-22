@@ -44,6 +44,5 @@ export default StyleSheet.create({
   changeLocation: {
     fontWeight: '600',
     textDecorationLine: 'underline',
-    textDecorationStyle: 'dotted',
   },
 });
