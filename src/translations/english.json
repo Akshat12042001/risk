@@ -43,6 +43,7 @@
         "COMING_DESCRIPTION": "We're currently live in select areas and expanding quickly. Get notified when we are near you!",
         "NOTIFY_ME": "Notify me!",
         "CHANGE_LOCATION": "Change location",
+        "ADD_LOCATION": "Add location",
         "SERVICES_TITLE": "Services we offer"
     },
     "BOOKINGS_SCREEN": {
@@ -88,7 +89,11 @@
         "ADD": "Add addresses",
         "SAVED": "SAVED ADDRESSES",
         "CURRENTLY_SELECTED": "Currently selected",
-        "EDIT": "EDIT"
+        "EDIT": "EDIT",
+        "DELETE": "DELETE",
+        "DELETE_CONFIRMATION": "Delete address",
+        "DELETE_CONFIRMATION_MESSAGE": "Are you sure you want to delete this address?",
+        "MARK_AS_CURRENT": "MARK AS CURRENT"
     },
     "CONFIRM_LOCATION_SCREEN": {
         "TITLE": "Confirm your location",
@@ -102,6 +107,7 @@
     },
     "ADD_ADDRESS_DETAIL_SCREEN": {
         "TITLE": "Add address details",
+        "EDIT_TITLE": "Edit address details",
         "ADDRESS_DETAILS": "Address details",
         "SAVE_AS": "Save address as",
         "HOME": "Home",

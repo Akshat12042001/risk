@@ -29,7 +29,7 @@ import {
 } from '../../../utils/location';
 import styles from './styles';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
+import {useNavigation, useRoute} from '@react-navigation/native';
 
 const DEFAULT_COORDINATE = {
   latitude: 30.7046,
@@ -54,6 +54,7 @@ const ConfirmLocationScreen = () => {
   const skipGeocodeRef = useRef(false);
   const geocodeRequestId = useRef(0);
   const navigation = useNavigation();
+  const route = useRoute();
 
   const apiKey =
     Config.GOOGLE_MAPS_API_KEY || 'AIzaSyBteSXgeCh5tcLGtCGTAH762pkqvdnaDzk';
@@ -312,11 +313,13 @@ const ConfirmLocationScreen = () => {
 
   const handleConfirm = useCallback(() => {
     navigation.navigate(NAVIGATION.COMMON.ADD_ADDRESS_DETAIL_SCREEN, {
+      editingAddress: route.params?.editingAddress,
       address: selectedLocation.address,
+      area: selectedLocation.address,
       latitude: selectedLocation.latitude,
       longitude: selectedLocation.longitude,
     });
-  }, [navigation, selectedLocation]);
+  }, [navigation, route.params?.editingAddress, selectedLocation]);
 
   return (
     <ScreenContainer noPaddingBottom noPaddingTop>

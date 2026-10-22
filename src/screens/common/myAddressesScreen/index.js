@@ -1,6 +1,7 @@
-import React, {useCallback, useEffect } from 'react';
+import React, {useCallback, useState} from 'react';
 import {Pressable, ScrollView, View} from 'react-native';
 import {useTranslation} from 'react-i18next';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import {
   Header,
   Icon,
@@ -8,48 +9,82 @@ import {
   StyledText,
 } from '../../../components/atoms';
 import {COLORS, NAVIGATION} from '../../../constants';
+import {errorToast, showAlert} from '../../../utils/alerts';
+import {
+  makeDeleteAddressRequest,
+  makeGetAddressesRequest,
+  makeSelectAddressRequest,
+} from '../../../api/common';
 import styles from './styles';
-import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import {useNavigation} from '@react-navigation/native';
-import { makeGetAddressesRequest } from '../../../api/common';
-
-const SAVED_ADDRESSES = [
-  {
-    id: '1',
-    label: 'Home',
-    isSelected: true,
-    lines: [
-      '2411 , Home, 2912, Sector 42C, Sector 18,',
-      'Chandigarh, Chandigarh, India, 160022,',
-      'Mobile:8219840664',
-    ],
-  },
-];
 
 const MyAddressesScreen = () => {
   const {t} = useTranslation();
-  const insets = useSafeAreaInsets();
   const navigation = useNavigation();
+  const [addresses, setAddresses] = useState([]);
+
   const handleAddAddress = useCallback(() => {
     navigation.navigate(NAVIGATION.COMMON.CONFIRM_LOCATION_SCREEN);
   }, [navigation]);
 
-  const handleEditAddress = useCallback(() => {
-    // Edit address flow will be wired later
-  }, []);
-
   const handleGetAddresses = useCallback(async () => {
     try {
       const response = await makeGetAddressesRequest();
-      console.log(response);
+      setAddresses(response?.data?.addresses || []);
     } catch (error) {
-      console.log(error); 
+      errorToast(error?.response?.data?.message);
     }
   }, []);
 
-  useEffect(() => {
-    handleGetAddresses();
-  }, [handleGetAddresses]);
+  const handleEditAddress = useCallback(
+    address => {
+      navigation.navigate(NAVIGATION.COMMON.ADD_ADDRESS_DETAIL_SCREEN, {
+        editingAddress: address,
+      });
+    },
+    [navigation],
+  );
+
+  const handleSelectAddress = useCallback(
+    async address => {
+      if (address.isSelected) {
+        return;
+      }
+      try {
+        await makeSelectAddressRequest(address.id);
+        handleGetAddresses();
+      } catch (error) {
+        errorToast(error?.response?.data?.message);
+      }
+    },
+    [handleGetAddresses],
+  );
+
+  const handleDeleteAddress = useCallback(
+    address => {
+      showAlert({
+        title: t('MY_ADDRESSES_SCREEN.DELETE_CONFIRMATION'),
+        message: t('MY_ADDRESSES_SCREEN.DELETE_CONFIRMATION_MESSAGE'),
+        isConfirmationPopup: true,
+        t,
+        onCancel: () => {},
+        onSuccess: async () => {
+          try {
+            await makeDeleteAddressRequest(address.id);
+            handleGetAddresses();
+          } catch (error) {
+            errorToast(error?.response?.data?.message);
+          }
+        },
+      });
+    },
+    [handleGetAddresses, t],
+  );
+
+  useFocusEffect(
+    useCallback(() => {
+      handleGetAddresses();
+    }, [handleGetAddresses]),
+  );
 
   return (
     <ScreenContainer noPaddingBottom noPaddingTop>
@@ -79,8 +114,11 @@ const MyAddressesScreen = () => {
             {t('MY_ADDRESSES_SCREEN.SAVED')}
           </StyledText>
 
-          {SAVED_ADDRESSES.map(address => (
-            <Pressable key={address.id} style={styles.addressCard}>
+          {addresses.map(address => (
+            <Pressable
+              key={address.id}
+              style={styles.addressCard}
+              onPress={() => handleSelectAddress(address)}>
               <View style={styles.addressTop}>
                 <View style={styles.pinBox}>
                   <Icon name="place" size={22} color={COLORS.GRAY} />
@@ -110,17 +148,48 @@ const MyAddressesScreen = () => {
                     color={COLORS.GRAY}
                     size={13}
                     textStyle={styles.addressText}>
-                    {address.lines.join('\n')}
+                    {address.displayAddress}
                   </StyledText>
 
-                  <Pressable onPress={handleEditAddress} hitSlop={8}>
-                    <StyledText
-                      color={COLORS.PRIMARY}
-                      size={13}
-                      textStyle={styles.editLabel}>
-                      {t('MY_ADDRESSES_SCREEN.EDIT')}
-                    </StyledText>
-                  </Pressable>
+                  <View style={styles.actionsRow}>
+                    <Pressable
+                      style={styles.actionButton}
+                      onPress={() => handleEditAddress(address)}
+                      hitSlop={8}>
+                      <StyledText
+                        color={COLORS.PRIMARY}
+                        size={13}
+                        textStyle={styles.editLabel}>
+                        {t('MY_ADDRESSES_SCREEN.EDIT')}
+                      </StyledText>
+                    </Pressable>
+
+                    {!address.isSelected ? (
+                      <Pressable
+                        style={styles.actionButton}
+                        onPress={() => handleSelectAddress(address)}
+                        hitSlop={8}>
+                        <StyledText
+                          color={COLORS.PRIMARY}
+                          size={13}
+                          textStyle={styles.editLabel}>
+                          {t('MY_ADDRESSES_SCREEN.MARK_AS_CURRENT')}
+                        </StyledText>
+                      </Pressable>
+                    ) : null}
+
+                    <Pressable
+                      style={styles.actionButton}
+                      onPress={() => handleDeleteAddress(address)}
+                      hitSlop={8}>
+                      <StyledText
+                        color={COLORS.TOAST_ERROR_ICON}
+                        size={13}
+                        textStyle={styles.deleteLabel}>
+                        {t('MY_ADDRESSES_SCREEN.DELETE')}
+                      </StyledText>
+                    </Pressable>
+                  </View>
                 </View>
               </View>
             </Pressable>

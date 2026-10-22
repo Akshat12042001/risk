@@ -1,4 +1,4 @@
-import React, {useCallback, useMemo, useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import {Pressable, View} from 'react-native';
 import {useNavigation, useRoute} from '@react-navigation/native';
 import {useTranslation} from 'react-i18next';
@@ -11,6 +11,13 @@ import {
   StyledText,
 } from '../../../components/atoms';
 import {COLORS, NAVIGATION} from '../../../constants';
+import {NavigationService} from '../../../services';
+import {errorToast} from '../../../utils/alerts';
+import {
+  makeAddAddressRequest,
+  makeEditAddressRequest,
+  makeSelectAddressRequest,
+} from '../../../api/common';
 import styles from './styles';
 
 const ADDRESS_TYPES = {
@@ -18,22 +25,61 @@ const ADDRESS_TYPES = {
   OTHER: 'other',
 };
 
+const toLocalPhone = phone => {
+  const digits = String(phone || '').replace(/\D/g, '');
+  if (digits.length > 10) {
+    return digits.slice(-10);
+  }
+  return digits;
+};
+
+const getChangedFields = (original, current) => {
+  return Object.keys(current).reduce((changes, key) => {
+    if (String(current[key] ?? '') !== String(original[key] ?? '')) {
+      changes[key] = current[key];
+    }
+    return changes;
+  }, {});
+};
+
 const AddAddressDetailScreen = () => {
   const {t} = useTranslation();
   const navigation = useNavigation();
   const route = useRoute();
+  const editingAddress = route.params?.editingAddress;
 
-  const routeAddress =
-    route.params?.address || route.params?.selectedLocation?.address || '';
+  const initialArea =
+    editingAddress?.area ||
+    (typeof route.params?.address === 'string' ? route.params.address : '') ||
+    route.params?.area ||
+    '';
 
-  const [addressType, setAddressType] = useState(ADDRESS_TYPES.HOME);
-  const [flatNo, setFlatNo] = useState('');
-  const [floor, setFloor] = useState('');
-  const [buildingName, setBuildingName] = useState('');
-  const [landmark, setLandmark] = useState('');
-  const [receiverPhone, setReceiverPhone] = useState('');
-  const [receiverName, setReceiverName] = useState('');
+  const [addressType, setAddressType] = useState(
+    editingAddress?.saveAs || ADDRESS_TYPES.HOME,
+  );
+  const [flatNo, setFlatNo] = useState(editingAddress?.flatOrHouseNo || '');
+  const [floor, setFloor] = useState(editingAddress?.floor || '');
+  const [buildingName, setBuildingName] = useState(
+    editingAddress?.building || '',
+  );
+  const [landmark, setLandmark] = useState(editingAddress?.landmark || '');
+  const [area, setArea] = useState(initialArea);
+  const [receiverPhone, setReceiverPhone] = useState(
+    toLocalPhone(editingAddress?.receiverPhone),
+  );
+  const [receiverName, setReceiverName] = useState(
+    editingAddress?.receiverName || '',
+  );
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    const nextArea =
+      route.params?.area ||
+      (typeof route.params?.address === 'string' ? route.params.address : '');
+    if (nextArea) {
+      setArea(nextArea);
+    }
+  }, [route.params?.address, route.params?.area]);
 
   const isFormValid = useMemo(() => {
     return (
@@ -45,29 +91,93 @@ const AddAddressDetailScreen = () => {
   }, [buildingName, flatNo, receiverName, receiverPhone]);
 
   const handleChangeLocation = useCallback(() => {
-    if (navigation.canGoBack()) {
-      navigation.goBack();
-      return;
-    }
-    navigation.navigate(NAVIGATION.COMMON.CONFIRM_LOCATION_SCREEN);
-  }, [navigation]);
+    navigation.navigate(NAVIGATION.COMMON.CONFIRM_LOCATION_SCREEN, {
+      editingAddress,
+    });
+  }, [editingAddress, navigation]);
 
   const handleSaveAddress = useCallback(async () => {
     if (!isFormValid || isLoading) {
       return;
     }
+
+    const currentAddress = {
+      saveAs: addressType,
+      flatOrHouseNo: flatNo.trim(),
+      floor: floor.trim(),
+      building: buildingName.trim(),
+      landmark: landmark.trim(),
+      area,
+      receiverPhone: receiverPhone.trim(),
+      receiverName: receiverName.trim(),
+    };
+
     try {
       setIsLoading(true);
-      // Save address API will be wired later
+
+      if (editingAddress?.id) {
+        const changes = getChangedFields(
+          {
+            saveAs: editingAddress.saveAs,
+            flatOrHouseNo: editingAddress.flatOrHouseNo || '',
+            floor: editingAddress.floor || '',
+            building: editingAddress.building || '',
+            landmark: editingAddress.landmark || '',
+            area: editingAddress.area || '',
+            receiverPhone: toLocalPhone(editingAddress.receiverPhone),
+            receiverName: editingAddress.receiverName || '',
+          },
+          currentAddress,
+        );
+
+        if (Object.keys(changes).length > 0) {
+          await makeEditAddressRequest(editingAddress.id, changes);
+        }
+
+        if (!editingAddress.isSelected) {
+          await makeSelectAddressRequest(editingAddress.id);
+        }
+      } else {
+        const response = await makeAddAddressRequest(currentAddress);
+        const createdAddress = response?.data?.address || response?.data;
+        if (createdAddress?.id) {
+          await makeSelectAddressRequest(createdAddress.id);
+        }
+      }
+
+      NavigationService.reset({
+        index: 0,
+        routes: [{name: NAVIGATION.STACKS.TABS}],
+      });
+    } catch (error) {
+      errorToast(error?.response?.data?.message);
     } finally {
       setIsLoading(false);
     }
-  }, [isFormValid, isLoading]);
+  }, [
+    addressType,
+    area,
+    buildingName,
+    editingAddress,
+    flatNo,
+    floor,
+    isFormValid,
+    isLoading,
+    landmark,
+    receiverName,
+    receiverPhone,
+  ]);
 
   return (
     <ScreenContainer noPaddingBottom noPaddingTop>
       <View style={styles.root}>
-        <Header title={t('ADD_ADDRESS_DETAIL_SCREEN.TITLE')} />
+        <Header
+          title={t(
+            editingAddress
+              ? 'ADD_ADDRESS_DETAIL_SCREEN.EDIT_TITLE'
+              : 'ADD_ADDRESS_DETAIL_SCREEN.TITLE',
+          )}
+        />
 
         <KeyboardAwareScrollView
           enableOnAndroid
@@ -175,7 +285,7 @@ const AddAddressDetailScreen = () => {
                 color={COLORS.BLACK}
                 size={15}
                 textStyle={styles.areaAddress}>
-                {routeAddress}
+                {area}
               </StyledText>
             </View>
 

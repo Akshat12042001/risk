@@ -43,6 +43,7 @@ export default StyleSheet.create({
     backgroundColor: COLORS.WHITE,
     borderRadius: 14,
     padding: 14,
+    marginBottom: 14,
     shadowColor: '#0F172A',
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.06,
@@ -88,7 +89,20 @@ export default StyleSheet.create({
     lineHeight: 20,
     marginBottom: 12,
   },
+  actionsRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+  },
+  actionButton: {
+    marginRight: 16,
+    marginBottom: 4,
+  },
   editLabel: {
+    fontWeight: '700',
+    letterSpacing: 0.4,
+  },
+  deleteLabel: {
     fontWeight: '700',
     letterSpacing: 0.4,
   },

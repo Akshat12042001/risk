@@ -1,21 +1,49 @@
-import React, {useCallback} from 'react';
-import {Pressable, ScrollView, StatusBar, View} from 'react-native';
+import React, {useCallback, useState} from 'react';
+import {Pressable, ScrollView, View} from 'react-native';
+import {useFocusEffect} from '@react-navigation/native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {useTranslation} from 'react-i18next';
 import {Icon, StyledText} from '../../../components/atoms';
 import {COLORS, NAVIGATION} from '../../../constants';
+import {makeGetAddressesRequest} from '../../../api/common';
+import {NavigationService} from '../../../services';
 import ComingSoonBanner from './components/ComingSoonBanner';
 import ServiceCard from './components/ServiceCard';
 import {LOCATION, SERVICES} from './data';
 import styles from './styles';
-import { useNavigation } from '@react-navigation/native';
 
 const HomeScreen = () => {
   const {t} = useTranslation();
   const insets = useSafeAreaInsets();
   const isServiceable = LOCATION.isServiceable;
-  const navigation = useNavigation();
+  const [selectedAddress, setSelectedAddress] = useState(null);
 
+  useFocusEffect(
+    useCallback(() => {
+      let isActive = true;
+
+      const loadSelectedAddress = async () => {
+        try {
+          const response = await makeGetAddressesRequest();
+          const addresses = response?.data?.addresses || [];
+          const current = addresses.find(address => address.isSelected) || null;
+          if (isActive) {
+            setSelectedAddress(current);
+          }
+        } catch (error) {
+          if (isActive) {
+            setSelectedAddress(null);
+          }
+        }
+      };
+
+      loadSelectedAddress();
+
+      return () => {
+        isActive = false;
+      };
+    }, []),
+  );
 
   const handleNotify = useCallback(() => {
     // Notify via WhatsApp will be wired later
@@ -26,12 +54,26 @@ const HomeScreen = () => {
   }, []);
 
   const handleProfilePress = useCallback(() => {
-    navigation.navigate(NAVIGATION.STACKS.COMMON, {screen: NAVIGATION.COMMON.PROFILE_SCREEN});
-  }, [navigation]);
+    NavigationService.navigate(NAVIGATION.STACKS.COMMON, {
+      screen: NAVIGATION.COMMON.PROFILE_SCREEN,
+    });
+  }, []);
 
   const handleLocationPress = useCallback(() => {
-    // Location picker will be wired later
-  }, []);
+    if (!selectedAddress) {
+      NavigationService.navigate(NAVIGATION.STACKS.COMMON, {
+        screen: NAVIGATION.COMMON.CONFIRM_LOCATION_SCREEN,
+        initial: false,
+      });
+      return;
+    }
+
+    NavigationService.navigate(NAVIGATION.STACKS.COMMON, {
+      screen: NAVIGATION.COMMON.ADD_ADDRESS_DETAIL_SCREEN,
+      params: {editingAddress: selectedAddress},
+      initial: false,
+    });
+  }, [selectedAddress]);
 
   return (
     <View style={styles.root}>
@@ -46,17 +88,23 @@ const HomeScreen = () => {
               color={COLORS.WHITE}
               size={20}
               textStyle={styles.locationTitle}>
-              {LOCATION.title}
+              {selectedAddress
+                ? selectedAddress.flatOrHouseNo || selectedAddress.label
+                : t('HOME_SCREEN.ADD_LOCATION')}
             </StyledText>
-            <Icon name="keyboard-arrow-down" size={22} color={COLORS.WHITE} />
+            {selectedAddress ? (
+              <Icon name="keyboard-arrow-down" size={22} color={COLORS.WHITE} />
+            ) : null}
           </View>
-          <StyledText
-            color={COLORS.WHITE}
-            size={12}
-            numberOfLines={1}
-            textStyle={styles.locationAddress}>
-            {LOCATION.address}
-          </StyledText>
+          {selectedAddress ? (
+            <StyledText
+              color={COLORS.WHITE}
+              size={12}
+              numberOfLines={1}
+              textStyle={styles.locationAddress}>
+              {selectedAddress.displayAddress || selectedAddress.area}
+            </StyledText>
+          ) : null}
         </Pressable>
 
         <Pressable
