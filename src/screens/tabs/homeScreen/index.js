@@ -6,17 +6,23 @@ import {useTranslation} from 'react-i18next';
 import {Icon, StyledText} from '../../../components/atoms';
 import {COLORS, NAVIGATION} from '../../../constants';
 import {makeGetAddressesRequest} from '../../../api/common';
+import {useGetHomeQuery} from '../../../redux/api/homeApi';
 import {NavigationService} from '../../../services';
-import ComingSoonBanner from './components/ComingSoonBanner';
 import ServiceCard from './components/ServiceCard';
-import {LOCATION, SERVICES} from './data';
+import ServiceCardSkeleton from './components/ServiceCardSkeleton';
 import styles from './styles';
+
+const SKELETON_COUNT = 6;
 
 const HomeScreen = () => {
   const {t} = useTranslation();
   const insets = useSafeAreaInsets();
-  const isServiceable = LOCATION.isServiceable;
   const [selectedAddress, setSelectedAddress] = useState(null);
+  const {
+    data: services = [],
+    isLoading: isHomeLoading,
+    refetch: refetchHome,
+  } = useGetHomeQuery();
 
   useFocusEffect(
     useCallback(() => {
@@ -38,22 +44,13 @@ const HomeScreen = () => {
       };
 
       loadSelectedAddress();
+      refetchHome();
 
       return () => {
         isActive = false;
       };
-    }, []),
+    }, [refetchHome]),
   );
-
-  const handleNotify = useCallback(() => {
-    // Notify via WhatsApp will be wired later
-  }, []);
-
-  const handleChangeLocation = useCallback(() => {
-    NavigationService.navigate(NAVIGATION.STACKS.COMMON, {
-      screen: NAVIGATION.COMMON.MY_ADDRESSES_SCREEN,
-    });
-  }, []);
 
   const handleProfilePress = useCallback(() => {
     NavigationService.navigate(NAVIGATION.STACKS.COMMON, {
@@ -77,9 +74,15 @@ const HomeScreen = () => {
     });
   }, [selectedAddress]);
 
+  const handleServicePress = useCallback(serviceId => {
+    NavigationService.navigate(NAVIGATION.STACKS.COMMON, {
+      screen: NAVIGATION.COMMON.SERVICE_DETAIL_SCREEN,
+      params: {serviceId},
+    });
+  }, []);
+
   return (
     <View style={styles.root}>
-
       <View style={[styles.header, {paddingTop: insets.top + 10}]}>
         <Pressable
           style={styles.locationBlock}
@@ -120,27 +123,19 @@ const HomeScreen = () => {
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.listContent}>
-        {!isServiceable ? (
-          <ComingSoonBanner
-            onNotify={handleNotify}
-            onChangeLocation={handleChangeLocation}
-          />
-        ) : null}
-
         <View style={styles.servicesSection}>
-          {!isServiceable ? (
-            <StyledText
-              color={COLORS.BLACK}
-              size={20}
-              textStyle={styles.sectionTitle}>
-              {t('HOME_SCREEN.SERVICES_TITLE')}
-            </StyledText>
-          ) : null}
-
           <View style={styles.grid}>
-            {SERVICES.map(item => (
-              <ServiceCard key={item.id} item={item} />
-            ))}
+            {isHomeLoading
+              ? Array.from({length: SKELETON_COUNT}).map((_, index) => (
+                  <ServiceCardSkeleton key={`skeleton-${index}`} />
+                ))
+              : services.map(item => (
+                  <ServiceCard
+                    key={item.id}
+                    item={item}
+                    onPress={() => handleServicePress(item.id)}
+                  />
+                ))}
           </View>
         </View>
       </ScrollView>

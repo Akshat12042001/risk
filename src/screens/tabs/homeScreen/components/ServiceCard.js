@@ -5,12 +5,24 @@ import {COLORS} from '../../../../constants';
 import styles from './ServiceCard.styles';
 
 const ServiceCard = ({item, onPress}) => {
+  const imageUri = item.imageUrl || item.image;
+  const showNewBadge =
+    item.isNew ||
+    (typeof item.badge === 'string' &&
+      item.badge.toLowerCase() === 'new');
+
   return (
     <Pressable style={styles.card} onPress={onPress}>
       <View style={styles.imageArea}>
-        <Image source={{uri: item.image}} style={styles.image} resizeMode="contain" />
+        {imageUri ? (
+          <Image
+            source={{uri: imageUri}}
+            style={styles.image}
+            resizeMode="contain"
+          />
+        ) : null}
 
-        {item.isNew ? (
+        {showNewBadge ? (
           <View style={styles.newBadge}>
             <StyledText color={COLORS.WHITE} size={9} textStyle={styles.newText}>
               NEW

@@ -16,7 +16,8 @@ export default {
     MY_ADDRESSES_SCREEN: 'Common-MyAddressesScreen',
     CONFIRM_LOCATION_SCREEN: 'Common-ConfirmLocationScreen',
     ADD_ADDRESS_DETAIL_SCREEN: 'Common-AddAddressDetailScreen',
-  },
+    SERVICE_DETAIL_SCREEN: 'Common-ServiceDetailScreen',
+  },  
   TABS: {
     HOME_SCREEN: 'Tabs-HomeScreen',
     BOOKINGS_SCREEN: 'Tabs-BookingsScreen',
