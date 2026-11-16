@@ -1,13 +1,22 @@
-import React, {useCallback, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {Pressable, ScrollView, View} from 'react-native';
 import {useFocusEffect} from '@react-navigation/native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {useTranslation} from 'react-i18next';
+import {useDispatch, useSelector} from 'react-redux';
 import {Icon, StyledText} from '../../../components/atoms';
 import {COLORS, NAVIGATION} from '../../../constants';
 import {makeGetAddressesRequest} from '../../../api/common';
 import {useGetHomeQuery} from '../../../redux/api/homeApi';
+import {fetchCart} from '../../../redux/cart/cart.actions';
+import {
+  selectCartCount,
+  selectCartData,
+  selectCartItems,
+} from '../../../redux/cart/cart.reducer';
 import {NavigationService} from '../../../services';
+import ReviewServicesModal from '../../common/serviceDetailScreen/components/ReviewServicesModal';
+import HomeCartBar from './components/HomeCartBar';
 import ServiceCard from './components/ServiceCard';
 import ServiceCardSkeleton from './components/ServiceCardSkeleton';
 import styles from './styles';
@@ -17,12 +26,25 @@ const SKELETON_COUNT = 6;
 const HomeScreen = () => {
   const {t} = useTranslation();
   const insets = useSafeAreaInsets();
+  const dispatch = useDispatch();
+  const cart = useSelector(selectCartData);
+  const cartItems = useSelector(selectCartItems);
+  const cartCount = useSelector(selectCartCount);
   const [selectedAddress, setSelectedAddress] = useState(null);
+  const [isReviewOpen, setIsReviewOpen] = useState(false);
   const {
     data: services = [],
     isLoading: isHomeLoading,
     refetch: refetchHome,
   } = useGetHomeQuery();
+
+  const firstCartItem = cartItems[0];
+  const cartServiceName =
+    cartCount === 1
+      ? firstCartItem?.name || ''
+      : cartCount > 1
+        ? `${firstCartItem?.name || 'Service'} +${cartCount - 1}`
+        : '';
 
   useFocusEffect(
     useCallback(() => {
@@ -44,12 +66,13 @@ const HomeScreen = () => {
       };
 
       loadSelectedAddress();
+      dispatch(fetchCart()).catch(() => {});
       refetchHome();
 
       return () => {
         isActive = false;
       };
-    }, [refetchHome]),
+    }, [dispatch, refetchHome]),
   );
 
   const handleProfilePress = useCallback(() => {
@@ -80,6 +103,27 @@ const HomeScreen = () => {
       params: {serviceId},
     });
   }, []);
+
+  const handleOpenReview = useCallback(() => {
+    setIsReviewOpen(true);
+  }, []);
+
+  const handleCloseReview = useCallback(() => {
+    setIsReviewOpen(false);
+  }, []);
+
+  const handleGoToCart = useCallback(() => {
+    setIsReviewOpen(false);
+    NavigationService.navigate(NAVIGATION.STACKS.COMMON, {
+      screen: NAVIGATION.COMMON.CART_SCREEN,
+    });
+  }, []);
+
+  useEffect(() => {
+    if (cartCount === 0 && isReviewOpen) {
+      setIsReviewOpen(false);
+    }
+  }, [cartCount, isReviewOpen]);
 
   return (
     <View style={styles.root}>
@@ -122,7 +166,10 @@ const HomeScreen = () => {
 
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.listContent}>
+        contentContainerStyle={[
+          styles.listContent,
+          cartCount > 0 && styles.listContentWithCart,
+        ]}>
         <View style={styles.servicesSection}>
           <View style={styles.grid}>
             {isHomeLoading
@@ -139,6 +186,23 @@ const HomeScreen = () => {
           </View>
         </View>
       </ScrollView>
+
+      {cartCount > 0 && !isReviewOpen ? (
+        <HomeCartBar
+          count={cartCount}
+          countLabel={cart?.serviceCountLabel}
+          serviceName={cartServiceName}
+          imageUrl={firstCartItem?.imageUrl}
+          onPressSummary={handleOpenReview}
+          onGoToCart={handleGoToCart}
+        />
+      ) : null}
+
+      <ReviewServicesModal
+        visible={isReviewOpen && cartCount > 0}
+        onClose={handleCloseReview}
+        onGoToCart={handleGoToCart}
+      />
     </View>
   );
 };

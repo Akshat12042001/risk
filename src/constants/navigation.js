@@ -17,6 +17,9 @@ export default {
     CONFIRM_LOCATION_SCREEN: 'Common-ConfirmLocationScreen',
     ADD_ADDRESS_DETAIL_SCREEN: 'Common-AddAddressDetailScreen',
     SERVICE_DETAIL_SCREEN: 'Common-ServiceDetailScreen',
+    CART_SCREEN: 'Common-CartScreen',
+    COUPON_SCREEN: 'Common-CouponScreen',
+    BOOKING_DETAIL_SCREEN: 'Common-BookingDetailScreen',
   },  
   TABS: {
     HOME_SCREEN: 'Tabs-HomeScreen',

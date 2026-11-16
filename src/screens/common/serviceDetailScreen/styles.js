@@ -20,6 +20,9 @@ export default StyleSheet.create({
   scrollContent: {
     paddingBottom: 40,
   },
+  scrollContentWithCart: {
+    paddingBottom: 110,
+  },
 
   heroWrap: {
     height: HERO_HEIGHT,
@@ -122,7 +125,7 @@ export default StyleSheet.create({
   },
   durationCard: {
     width: 118,
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: COLORS.BORDER,
     borderRadius: 12,
     paddingHorizontal: 12,
@@ -130,6 +133,10 @@ export default StyleSheet.create({
     paddingBottom: 12,
     marginRight: 10,
     backgroundColor: COLORS.WHITE,
+  },
+  durationCardSelected: {
+    borderColor: COLORS.PRIMARY,
+    backgroundColor: '#F0FDFA',
   },
   durationLabel: {
     fontWeight: '700',
@@ -155,9 +162,173 @@ export default StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 7,
+    backgroundColor: COLORS.WHITE,
+  },
+  addButtonSelected: {
+    backgroundColor: COLORS.PRIMARY,
+    borderColor: COLORS.PRIMARY,
   },
   addButtonText: {
     fontWeight: '700',
+  },
+  cartBar: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: COLORS.WHITE,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: COLORS.BORDER,
+    paddingHorizontal: SCREEN_PADDING,
+    paddingTop: 12,
+  },
+  cartSummary: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+    marginRight: 12,
+  },
+  cartThumb: {
+    width: 36,
+    height: 36,
+    borderRadius: 8,
+    marginRight: 10,
+    backgroundColor: '#F0FDFA',
+  },
+  cartThumbFallback: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  cartCount: {
+    fontWeight: '700',
+    marginRight: 2,
+  },
+  cartCta: {
+    backgroundColor: COLORS.PRIMARY,
+    borderRadius: 10,
+    paddingHorizontal: 22,
+    paddingVertical: 14,
+    minWidth: 140,
+    alignItems: 'center',
+  },
+  cartCtaText: {
+    fontWeight: '700',
+  },
+  reviewRoot: {
+    flex: 1,
+    justifyContent: 'flex-end',
+  },
+  reviewBackdrop: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.45)',
+  },
+  reviewSheet: {
+    backgroundColor: '#F3F4F6',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingHorizontal: SCREEN_PADDING,
+    paddingTop: 18,
+    paddingBottom: 100,
+    maxHeight: SCREEN.HEIGHT * 0.62,
+  },
+  reviewHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 14,
+  },
+  reviewTitle: {
+    fontWeight: '800',
+  },
+  reviewClose: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#E5E7EB',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  reviewCard: {
+    backgroundColor: COLORS.WHITE,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: COLORS.BORDER,
+    paddingHorizontal: 14,
+    paddingTop: 14,
+    paddingBottom: 6,
+  },
+  reviewCardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 12,
+  },
+  reviewCardTitle: {
+    fontWeight: '700',
+  },
+  reviewList: {
+    maxHeight: SCREEN.HEIGHT * 0.34,
+  },
+  reviewItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: COLORS.BORDER,
+  },
+  reviewThumb: {
+    width: 44,
+    height: 44,
+    borderRadius: 10,
+    marginRight: 10,
+    backgroundColor: '#F0FDFA',
+  },
+  reviewItemInfo: {
+    flex: 1,
+    marginRight: 10,
+  },
+  reviewItemName: {
+    fontWeight: '600',
+    marginBottom: 4,
+  },
+  reviewPriceRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  reviewOriginalPrice: {
+    marginRight: 6,
+    textDecorationLine: 'line-through',
+  },
+  minutesControl: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1.5,
+    borderColor: COLORS.PRIMARY,
+    borderRadius: 10,
+    paddingHorizontal: 4,
+    paddingVertical: 4,
+    minWidth: 108,
+  },
+  minutesButton: {
+    width: 28,
+    height: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  minutesValue: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  minutesNumber: {
+    fontWeight: '800',
+    lineHeight: 18,
+  },
+  minutesUnit: {
+    fontWeight: '600',
+    marginTop: -1,
   },
   sectionTitle: {
     fontWeight: '800',

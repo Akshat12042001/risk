@@ -10,11 +10,25 @@ import {
 } from 'react-native';
 import {useNavigation, useRoute} from '@react-navigation/native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import {useDispatch, useSelector} from 'react-redux';
 import {Icon, StyledText} from '../../../components/atoms';
-import {COLORS} from '../../../constants';
+import {COLORS, NAVIGATION} from '../../../constants';
 import {makeGetServiceRequest} from '../../../api/services';
+import {
+  addCartItem,
+  fetchCart,
+  removeCartItemByServiceId,
+} from '../../../redux/cart/cart.actions';
+import {
+  selectCartCount,
+  selectCartItemByServiceId,
+  selectCartItems,
+} from '../../../redux/cart/cart.reducer';
+import {errorToast} from '../../../utils/alerts';
+import CartBar from './components/CartBar';
 import DurationCard from './components/DurationCard';
 import FaqItem from './components/FaqItem';
+import ReviewServicesModal from './components/ReviewServicesModal';
 import TrustFooter from './components/TrustFooter';
 import styles from './styles';
 
@@ -100,6 +114,7 @@ const mapServiceResponse = payload => {
 
   return {
     ...EMPTY_SERVICE,
+    id: apiData.id || null,
     name: apiData.name || '',
     badge: apiData.label || apiData.badge || '',
     headline: apiData.headline || '',
@@ -122,11 +137,19 @@ const ServiceDetailScreen = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const insets = useSafeAreaInsets();
+  const dispatch = useDispatch();
   const serviceId = route.params?.serviceId;
+
+  const cartItems = useSelector(selectCartItems);
+  const cartCount = useSelector(selectCartCount);
+  const cartItemForService = useSelector(state =>
+    selectCartItemByServiceId(state, serviceId),
+  );
 
   const [data, setData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [expandedFaqId, setExpandedFaqId] = useState(null);
+  const [isReviewOpen, setIsReviewOpen] = useState(false);
 
   useEffect(() => {
     let isActive = true;
@@ -191,13 +214,64 @@ const ServiceDetailScreen = () => {
     // Booking flow will be wired later
   }, []);
 
-  const handleAddDuration = useCallback(() => {
-    // Cart/add flow will be wired later
+  useEffect(() => {
+    dispatch(fetchCart()).catch(() => {});
+  }, [dispatch]);
+
+  const handleDurationPress = useCallback(
+    async item => {
+      if (!data?.id) {
+        return;
+      }
+
+      const isSelected =
+        String(cartItemForService?.durationId) === String(item.id);
+
+      try {
+        if (isSelected) {
+          await dispatch(removeCartItemByServiceId(data.id));
+          return;
+        }
+
+        await dispatch(
+          addCartItem({
+            serviceId: String(data.id),
+            durationId: String(item.id),
+            durations: data.durations,
+          }),
+        );
+      } catch (error) {
+        // API client already toasts response messages
+        if (!error?.response?.data?.message) {
+          errorToast(error?.message || 'Unable to update cart');
+        }
+      }
+    },
+    [cartItemForService?.durationId, data, dispatch],
+  );
+
+  const handleGoToCart = useCallback(() => {
+    setIsReviewOpen(false);
+    navigation.navigate(NAVIGATION.COMMON.CART_SCREEN);
+  }, [navigation]);
+
+  const handleCartSummary = useCallback(() => {
+    setIsReviewOpen(true);
+  }, []);
+
+  const handleCloseReview = useCallback(() => {
+    setIsReviewOpen(false);
   }, []);
 
   const handleToggleFaq = useCallback(id => {
     setExpandedFaqId(prev => (prev === id ? null : id));
   }, []);
+
+  useEffect(() => {
+    if (cartCount === 0 && isReviewOpen) {
+      setIsReviewOpen(false);
+    }
+  }, [cartCount, isReviewOpen]);
 
   const renderFloatingBack = () => (
     <View style={[styles.heroTopBar, {top: insets.top + 6}]}>
@@ -240,7 +314,10 @@ const ServiceDetailScreen = () => {
 
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[
+          styles.scrollContent,
+          cartCount > 0 && styles.scrollContentWithCart,
+        ]}
         bounces={false}>
         <View style={styles.heroWrap}>
           {data.heroImage ? (
@@ -339,7 +416,8 @@ const ServiceDetailScreen = () => {
                   <DurationCard
                     key={item.id}
                     item={item}
-                    onAdd={handleAddDuration}
+                    selected={cartItemForService?.durationId === item.id}
+                    onPress={handleDurationPress}
                   />
                 ))}
               </ScrollView>
@@ -457,6 +535,21 @@ const ServiceDetailScreen = () => {
           ) : null}
         </View>
       </ScrollView>
+
+      {cartCount > 0 && !isReviewOpen ? (
+        <CartBar
+          count={cartCount}
+          imageUrl={cartItems[0]?.imageUrl || data.heroImage}
+          onPressSummary={handleCartSummary}
+          onGoToCart={handleGoToCart}
+        />
+      ) : null}
+
+      <ReviewServicesModal
+        visible={isReviewOpen && cartCount > 0}
+        onClose={handleCloseReview}
+        onGoToCart={handleGoToCart}
+      />
     </View>
   );
 };

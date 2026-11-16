@@ -4,9 +4,11 @@ import {StyledText} from '../../../../components/atoms';
 import {COLORS} from '../../../../constants';
 import styles from '../styles';
 
-const DurationCard = ({item, onAdd}) => {
+const DurationCard = ({item, selected, onPress}) => {
   return (
-    <View style={styles.durationCard}>
+    <Pressable
+      style={[styles.durationCard, selected && styles.durationCardSelected]}
+      onPress={() => onPress?.(item)}>
       <StyledText color={COLORS.BLACK} size={15} textStyle={styles.durationLabel}>
         {item.label}
       </StyledText>
@@ -23,15 +25,15 @@ const DurationCard = ({item, onAdd}) => {
           </StyledText>
         ) : null}
       </View>
-      <Pressable style={styles.addButton} onPress={() => onAdd?.(item)}>
+      <View style={[styles.addButton, selected && styles.addButtonSelected]}>
         <StyledText
-          color={COLORS.PRIMARY}
+          color={selected ? COLORS.WHITE : COLORS.PRIMARY}
           size={14}
           textStyle={styles.addButtonText}>
-          Add
+          {selected ? 'Added' : 'Add'}
         </StyledText>
-      </Pressable>
-    </View>
+      </View>
+    </Pressable>
   );
 };
 

@@ -15,7 +15,7 @@ import {
 
 const persistConfig = {
   key: 'root',
-  blacklist: [baseApi.reducerPath],
+  blacklist: [baseApi.reducerPath, 'cart'],
   storage: AsyncStorage,
 };
 

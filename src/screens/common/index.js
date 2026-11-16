@@ -4,3 +4,6 @@ export { default as MyAddressesScreen } from './myAddressesScreen';
 export { default as ConfirmLocationScreen } from './confirmLocationScreen'; 
 export { default as AddAddressDetailScreen } from './addAddressDetailScreen';
 export { default as ServiceDetailScreen } from './serviceDetailScreen';
+export { default as CartScreen } from './cartScreen';
+export { default as CouponScreen } from './couponScreen';
+export { default as BookingDetailScreen } from './bookingDetailScreen';

@@ -135,4 +135,53 @@ export default StyleSheet.create({
   emptyText: {
     fontWeight: '500',
   },
+  listContent: {
+    paddingHorizontal: SCREEN_PADDING,
+    paddingTop: 12,
+    paddingBottom: 100,
+  },
+  bookingCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.WHITE,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: COLORS.BORDER,
+    borderRadius: 14,
+    padding: 12,
+    marginBottom: 12,
+  },
+  bookingThumb: {
+    width: 56,
+    height: 56,
+    borderRadius: 10,
+    backgroundColor: '#F0FDFA',
+  },
+  bookingThumbFallback: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  bookingInfo: {
+    flex: 1,
+    marginLeft: 12,
+    marginRight: 4,
+  },
+  bookingTitle: {
+    fontWeight: '700',
+    marginBottom: 2,
+  },
+  bookingSchedule: {
+    marginTop: 4,
+  },
+  bookingMetaRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 8,
+  },
+  bookingAmount: {
+    fontWeight: '700',
+  },
+  bookingChevron: {
+    marginLeft: 2,
+  },
 });

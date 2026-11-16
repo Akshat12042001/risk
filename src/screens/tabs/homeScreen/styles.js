@@ -41,6 +41,10 @@ export default StyleSheet.create({
   listContent: {
     paddingBottom: 100,
   },
+  listContentWithCart: {
+    paddingBottom: 180,
+  },
+
   servicesSection: {
     paddingHorizontal: SCREEN_PADDING,
     paddingTop: 20,

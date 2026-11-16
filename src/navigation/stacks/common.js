@@ -8,6 +8,9 @@ import {
   ConfirmLocationScreen,
   AddAddressDetailScreen,
   ServiceDetailScreen,
+  CartScreen,
+  CouponScreen,
+  BookingDetailScreen,
 } from '../../screens/common';
 import config from '../config';
 
@@ -39,6 +42,18 @@ export default () => {
       <Stack.Screen
         name={NAVIGATION.COMMON.SERVICE_DETAIL_SCREEN}
         component={ServiceDetailScreen}
+      />
+      <Stack.Screen
+        name={NAVIGATION.COMMON.CART_SCREEN}
+        component={CartScreen}
+      />
+      <Stack.Screen
+        name={NAVIGATION.COMMON.COUPON_SCREEN}
+        component={CouponScreen}
+      />
+      <Stack.Screen
+        name={NAVIGATION.COMMON.BOOKING_DETAIL_SCREEN}
+        component={BookingDetailScreen}
       />
     </Stack.Navigator>
   );
